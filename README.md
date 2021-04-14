@@ -1,70 +1,148 @@
-# Getting Started with Create React App
+## Redux
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
++ Redux 是 JavaScript 状态容器，提供可预测化的状态管理。
++ 可以让你构建一致化的应用，运行于不同的环境（客户端、服务器、原生应用），并且易于测试。
++ Redux 不是 Facebook 官方出品嗷~ 它并不依赖于 React，除了和 React 一起用外，还支持其它界面库。
++ 它体小精悍（只有2kB，包括依赖）
 
-## Available Scripts
 
-In the project directory, you can run:
 
-### `yarn start`
+## 为啥要用 Redux
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
++ Redux 是一个状态管理库
++ React 的组件是一种状态机，它的视图随着状态的改变而发生变化，故状态管理就尤为重要
++ 特别是设计到状态有可能会进行跨组件传递使用，有了 Redux 可以让我们更方便的管理这些状态，而且这些状态都是可预测的，后期我们做单元测试什么的也非常方便
++ 好像说的挺绕的，参考一下 [VueX](https://juejin.cn/post/6909466305590460424#heading-0)，反正大白话就是，我要一个统一管理数据的东西，所以我要用它
++ 重点：**集中式存储管理** 应用的所有组件的 **状态**，并以相应的规则保证状态以一种 **可预测** 的方式发生变化
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
 
-### `yarn test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 安装
 
-### `yarn build`
+```sh
+npm i redux
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+yarn add redux
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `yarn eject`
+## Redux API
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### store
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
++ React 组件内我们使用 `useState` 管理单一状态，联想一下，Redux 是不是也要一个东西去管理状态，它就是 store
++ store - 商店/仓库/容器（管理状态）
+  + 用于管理 Redux 应用的状态
+  + **Redux 应用只有一个单一的 store**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
+### createStore
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
++ 需要使用 store 就得先把他创建出来，这个时候需要 `createStore`
++ createStore(reducer, [preloadedState], enhancer)
+  + [reducer](#reducer)(Function)：指定了应用状态的变化如何响应 actions 并发送到 store 的纯函数
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```javascript
+import { createStore } from 'redux';
 
-### Code Splitting
+const store = createStore(reducer);
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-### Analyzing the Bundle Size
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### <span id="reducer">reducer</span>
 
-### Making a Progressive Web App
++ reducer 是一个纯函数
+  1. 相同的输入永远返回相同的输出
+  2. 不修改函数的输入值
+  3. 不依赖外部环境状态
+  4. 无任何副作用
+  5. 便于测试
+  6. 有利重构
++ 它提供了提供操作状态的各种方式
++ 直白的说，他做的事情就是告诉仓库，该如何读写数据，以及提供操作数据的方法
++ 参数(state, action)
+  + **state** - 用于储存状态，一般给一个默认值
+  + **action** - 把数据从应用传到 store 的有效载荷。它是 store 数据的 **唯一** 来源。
+    + 告诉 store，要对 state 做怎样的操作
+    + 它的本质是一个对象
+    + 一般来说会通过 [dispatch](#dispatch) 将 action 传到 store
++ **永远不要**在 reducer 里做这些操作：
+  + 修改传入参数
+  + 执行有副作用的操作，如 API 请求和路由跳转
+  + 调用非纯函数，如 `Date.now()` 或 `Math.random()`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```javascript
+function reducer(state = {
+  data: []
+}, action) {
+  console.log(action);
+  return state
+}
+```
 
-### Advanced Configuration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
-### Deployment
+### store 方法
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
++ `getState()` - 获取 state
 
-### `yarn build` fails to minify
++ <span id="dispatch">`dispatch(action)`</span> - 分发 action，这是触发 state 变化的惟一途径
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+  + action 内必须使用一个字符串类型的 type 字段来表示将要执行的动作
+  + 一般情况下，我们会定义 type 为一个常量，故使用大写，这并非是强制性的，只是一个约定
+  + 调用 dispatch 时，store 会调用 reducer 函数 - 接收旧的 `state` 和 dispatch 传入的 `action`，传递 reducer，在 reducer 中，监听 action.type 的不同，返回新的 state
+  + **actions 只是描述了*有事情发生了*这一事实，并没有描述应用如何更新 state**
+
+```javascript
+import { createStore } from 'redux';
+
+function reducer(state = {
+  count: 1
+}, action) {
+  switch (action.type) {
+    case 'ADD':
+      return {
+        ...state,
+        count: state.count + 1
+      }
+    case 'MINUS':
+      return {
+        ...state,
+        count: state.count - 1
+      }
+    default:
+      return state
+  }
+}
+
+const store = createStore(reducer);
+store.dispatch({
+  type: "ADD"
+});
+console.log(store.getState()); // 2
+
+store.dispatch({
+  type: "MINUS"
+});
+console.log(store.getState()); // 1
+```
+
+  + 从结果我们可以看出来，`dispatch` 是 **同步方法**
+
++ `subscribe` - 监听 state 发生改变
+
+  + 接收一个函数，当状态改变时，则调用该函数
+  + 返回一个函数，该函数用于取消监听
+
+```javascript
+const unSubscribe = store.subscribe(() => {
+  console.log('state改变了');
+});
+unSubscribe(); // 取消监听
+```
+
+
+
