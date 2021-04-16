@@ -86,7 +86,7 @@ function reducer(state = {
 
 
 
-#### store 方法
+#### <span id="storeFn">store 方法</span>
 
 + `getState()` - 获取 state
 
@@ -238,5 +238,27 @@ render();
 
 ```sh
 npm i react-redux
+```
+
+
+
+### 简单使用
+
++ 使用 Provider 组件，包裹整个应用
+  + 在 Provider 中由一个 store 属性
+  + 其中导入的 store 可以参考上面的[示例](#storeFn)
+
+```javascript
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import App from './app';
+import { store } from './store'; // store方法里示例1，导出的 store，看上面
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.querySelector('#root')
+)
 ```
 
