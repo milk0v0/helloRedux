@@ -95,6 +95,7 @@ function reducer(state = {
   + action 内必须使用一个字符串类型的 type 字段来表示将要执行的动作
   + 一般情况下，我们会定义 type 为一个常量，故使用大写，这并非是强制性的，只是一个约定
   + 调用 dispatch 时，store 会调用 reducer 函数 - 接收旧的 `state` 和 dispatch 传入的 `action`，传递 reducer，在 reducer 中，监听 action.type 的不同，返回新的 state
+  + 当然它是可以支持载荷的，如果你想传值进去，那么你可以在 `action` 内写上就可以了
   + **actions 只是描述了*有事情发生了*这一事实，并没有描述应用如何更新 state**
 
 ```javascript
@@ -262,3 +263,84 @@ ReactDOM.render(
 )
 ```
 
+
+
+### 组件内获取 redux 的 store
+
+#### connect - 高阶组件
+
++ 利用 connect 函数创建一个高阶组件（传入组件，返回一个新的组件），将组件需要的 `state` 和 `dispatch` 传给组件
++ **connect(callback)(Cmp)**
+  + callback 必须有一个对象类型的返回值，该返回值决定了那些参数需要传递给组件
+  + connect 被调用后 会返回一个高阶组件
+  + connect 只是一个高阶函数，connect 的返回值才是一个高阶组件
+  + 获取到的 state 可在 props 拿到
+
+```javascript
+function App(props) {
+  const { count, dispatch } = props;
+  return (
+    <div>
+      <p>{count}</p>
+      <button onClick={() => {
+        dispatch({
+          type: 'ADD'
+        })
+      }}>+1</button>
+    </div>
+  )
+}
+
+const newApp = connect(state => {
+  console.log(state);
+  return {
+    count: state.count
+  }
+})(App);
+
+console.log(newApp);
+
+export default newApp
+
+// 合在一起
+// export default connect(state => ({ count: state.count }))(App)
+```
+
+
+
+### Hooks
+
++ 每个需要使用 store 的组件都需要通过上面这么一大堆才能拿得到确实太麻烦了，除了使用 connect 之外，咱还能使用 Hooks
++ 注意 Hooks 是 react-redux7.x 之后新增的
+  + **useSelector** - 获取 state
+    + 不像 connect 一定要返回对象，它可返回任意类型
+  + **useDispatch** - 获取 dispatch
+  + **useStore** - 获取 store
+
+```javascript
+import { useDispatch, useSelector, useStore } from "react-redux";
+
+export default function App(props) {
+  const count = useSelector(state => state.count);
+  const dispatch = useDispatch();
+  const store = useStore();
+  console.log(store);
+  return (
+    <div>
+      <p>{count}</p>
+      <button onClick={() => {
+        dispatch({
+          type: 'ADD'
+        })
+      }}>+1</button>
+    </div>
+  )
+}
+```
+
+
+
+## PS
+
++ 好像还有没写上的，combineReducers、applyMiddleware、常用的中间键。
++ 不过我要干新活了，有空再写上嗷~

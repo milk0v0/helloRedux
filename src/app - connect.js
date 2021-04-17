@@ -1,3 +1,4 @@
+import { connect } from "react-redux";
 
 /**
  * 如何在组件中获取 redux 的store
@@ -7,19 +8,13 @@
  *    - connect 被调用后 会返回一个高阶组件
  *    - connect 只是一个高阶函数，connect 的返回值才是一个高阶组件
  *  2. react-redux 提供的 Hooks （7）
- *    - useSelector 获取 state
- *      可返回任意类型
  *    - useDispatch 获取 dispatch
  *    - useStore 获取 store
+ *    - useSelector 获取 state 
  */
 
-import { useDispatch, useSelector, useStore } from "react-redux";
-
-export default function App(props) {
-  const count = useSelector(state => state.count);
-  const dispatch = useDispatch();
-  const store = useStore();
-  console.log(store);
+function App(props) {
+  const { count, dispatch } = props;
   return (
     <div>
       <p>{count}</p>
@@ -31,3 +26,17 @@ export default function App(props) {
     </div>
   )
 }
+
+const newApp = connect(state => {
+  console.log(state);
+  return {
+    count: state.count
+  }
+})(App);
+
+console.log(newApp);
+
+export default newApp
+
+// 合在一起
+// export default connect(state => ({ count: state.count }))(App)
